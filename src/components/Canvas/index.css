@@ -2,113 +2,102 @@
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   font-family: 'Poppins', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #f2f2f2;
+  min-height: 100vh;
+  padding: 1rem;
 }
 
+/* Canvas Container */
 .canvas-wrapper {
-  -webkit-border-radius: 25px;
-  -moz-border-radius: 25px;
-  -ms-border-radius: 25px;
-  -o-border-radius: 25px;
   border-radius: 25px;
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
 }
 
-/* Make sure canvas container tightly wraps the canvas */
+/* Canvas Controls Section */
 .canvas-controls {
-  background: #000000;
-  padding: 20px;
+  background: #000;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  justify-content: center;
   align-items: center;
-  gap: 20px;
-  width: fit-content;
-  -webkit-border-radius: 16px;
-  -moz-border-radius: 16px;
-  -ms-border-radius: 16px;
-  -o-border-radius: 16px;
+  gap: 1.5rem;
   border-radius: 16px;
+  width: 100%;
 }
 
-/* Explicitly set canvas size */
+/* Canvas Element */
 .canvas {
-  width: 600px !important;
-  height: 400px !important;
+  width: 100% !important;
+  max-width: 700px;
+  aspect-ratio: 3 / 2;
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
   background: #222;
   cursor: grab;
-  border: 2px dashed #ffffff;
-  display: block; /* remove inline/block spacing issues */
+  border: 2px dashed #fff;
 }
 
-/* Toolbar: flex row with wrap if needed */
+/* Toolbar Container - Grid Based */
 .toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  width: 100%;
   align-items: center;
-  padding: 0;
-  margin: 0;
-  margin-top: 1rem;
+  justify-items: center;
+  padding: 0.5rem 0;
 }
 
-/* Buttons common style */
-
+/* General Button Styles */
 .toolbar button,
-.upload-label{
-  color: #000000;
+.upload-label,
+.bring-front-back-buttons {
+  width: 100%;
+  max-width: 220px;
+  background-color: #fff;
+  color: #000;
   border: none;
-  padding: 12px 18px;
-  font-size: 18px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
   font-weight: 600;
   border-radius: 12px;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  width: 20%;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
 }
-
-.bring-front-back-buttons{ 
-  color: #000000;
-  border: none;
-  padding: 12px 18px;
-  font-size: 18px;
-  font-weight: 600;
-  border-radius: 12px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  width: 20%;}
 
 .toolbar button:hover,
 .upload-label:hover {
-  background: #000000;
-  box-shadow: 0 6px 15px rgb(62 142 65 / 0.8);
+  background-color: #000;
+  color: #fff;
+  box-shadow: 0 6px 15px rgba(62, 142, 65, 0.8);
   transform: translateY(-3px) scale(1.05);
-  color: #ffffff;
 }
 
 .toolbar button:active,
 .upload-label:active {
   transform: translateY(-1px) scale(1);
-  box-shadow: 0 4px 12px rgb(62 142 65 / 0.6);
+  box-shadow: 0 4px 12px rgba(62, 142, 65, 0.6);
 }
 
+.toolbar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+/* Upload Label */
 .upload-label {
   position: relative;
   overflow: hidden;
@@ -116,148 +105,131 @@ body {
 
 .upload-label input[type="file"] {
   position: absolute;
-  left: 0;
-  top: 0;
+  inset: 0;
   opacity: 0;
   cursor: pointer;
-  height: 100%;
-  width: 100%;
   z-index: 10;
 }
 
-/* Random sticker button - special styling */
-
+/* Random Sticker Button */
 .toolbar button.random-btn {
   background-color: #28a745;
   color: #fff;
   font-weight: 700;
   border-radius: 20px;
-  padding: 14px 22px;
-  width: 30%;
-  font-size: 20px;
+  padding: 0.9rem 1.5rem;
+  font-size: 1.1rem;
   box-shadow: 0 6px 20px rgba(40, 167, 69, 0.7);
-  transition: background-color 0.3s ease, transform 0.25s ease-in-out;
 }
 
 .toolbar button.random-btn:hover {
   background-color: #218838;
+  transform: scale(1.05) translateY(-4px);
   box-shadow: 0 8px 28px rgba(33, 136, 56, 0.85);
-  -webkit-transform: scale(1) translateY(-4px);
-  -moz-transform: scale(1) translateY(-4px);
-  -ms-transform: scale(1) translateY(-4px);
-  -o-transform: scale(1) translateY(-4px);
-  transform: scale(1) translateY(-4px);
 }
 
-.toolbar button.random-btn:active {
-  -webkit-transform: scale(1) translateY(-1px);
-  -moz-transform: scale(1) translateY(-1px);
-  -ms-transform: scale(1) translateY(-1px);
-  -o-transform: scale(1) translateY(-1px);
-  transform: scale(1) translateY(-1px);
-}
-
-/* Selected sticker controls buttons */
-
-.toolbar button:disabled {
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-/* Responsive */
-
-@media (max-width: 700px) {
-  .canvas-controls {
-    width: 100%;
-    padding: 15px;
-  }
-
-  .toolbar {
-    justify-content: space-around;
-  }
-
-  .toolbar button,
-  .upload-label {
-    font-size: 16px;
-    padding: 10px 14px;
-  }
-}
-
-
-/* Tour overlay: covers entire screen with semi-transparent black */
+/* Tour Overlay */
 .tour-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ffffff;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.9);
   z-index: 10000;
-  cursor: pointer; /* so user knows they can click to skip */
+  cursor: pointer;
 }
 
-/* Tour tooltip container */
+/* Tooltip Container */
 .tour-tooltip {
   position: fixed;
-  background: #ffffff;
-  padding: 12px 18px;
+  background: #fff;
+  padding: 1rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  max-width: 320px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  max-width: 90vw;
   z-index: 10001;
-  font-size: 14px;
+  font-size: 0.95rem;
   color: #222;
 }
 
-/* Tour tooltip buttons container */
+/* Tooltip Buttons */
 .tour-tooltip-buttons {
   margin-top: 10px;
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 0.75rem;
 }
 
-/* Tour buttons styling */
 .tour-tooltip-buttons button {
-  padding: 6px 14px;
+  padding: 0.5rem 1rem;
   background-color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.25s ease;
 }
 
-.tour-tooltip-buttons button.skip-btn {
+.tour-tooltip-buttons .skip-btn {
   background-color: #ccc;
   color: #333;
 }
 
-.tour-tooltip-buttons button.skip-btn:hover,
-.tour-tooltip-buttons button.skip-btn:focus {
+.tour-tooltip-buttons .skip-btn:hover {
   background-color: #bbb;
-  outline: none;
 }
 
-.tour-tooltip-buttons button.next-btn {
+.tour-tooltip-buttons .next-btn {
   background-color: #2196f3;
   color: #fff;
 }
 
-.tour-tooltip-buttons button.next-btn:hover,
-.tour-tooltip-buttons button.next-btn:focus {
+.tour-tooltip-buttons .next-btn:hover {
   background-color: #1976d2;
-  outline: none;
 }
 
-.tour-tooltip-buttons button.get-started-btn {
+.tour-tooltip-buttons .get-started-btn {
   background-color: #4caf50;
   color: #fff;
 }
 
-.tour-tooltip-buttons button.get-started-btn:hover,
-.tour-tooltip-buttons button.get-started-btn:focus {
+.tour-tooltip-buttons .get-started-btn:hover {
   background-color: #388e3c;
-  outline: none;
+}
+
+/* Responsive Tweaks */
+@media (max-width: 768px) {
+  .canvas {
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+
+  .toolbar {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .toolbar button,
+  .upload-label {
+    font-size: 0.95rem;
+    padding: 0.7rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar button,
+  .upload-label {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 0.65rem 1rem;
+  }
+
+  .canvas-controls {
+    padding: 1rem;
+  }
+
+  .tour-tooltip {
+    font-size: 0.85rem;
+  }
 }
