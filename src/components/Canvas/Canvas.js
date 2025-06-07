@@ -6,7 +6,7 @@ import './index.css';
 
 const tourSteps = [
   {
-    selector: '.toolbar button:nth-child(1)', // 😀 button
+    selector: '.toolbar button:nth-child(1)',
     content: 'Click here to add a smiley sticker.',
   },
   {
@@ -18,15 +18,15 @@ const tourSteps = [
     content: 'Upload your own sticker from your device here.',
   },
   {
-    selector: '.toolbar button:nth-child(7)', // Undo button
+    selector: '.toolbar button:nth-child(7)',
     content: 'Undo your last action.',
   },
   {
-    selector: '.toolbar button:nth-child(8)', // Redo button
+    selector: '.toolbar button:nth-child(8)',
     content: 'Redo your last undone action.',
   },
   {
-    selector: '.toolbar button:nth-child(6)', // Download button
+    selector: '.toolbar button:nth-child(6)',
     content: 'Download the current canvas as an image.',
   },
 ];
@@ -103,6 +103,9 @@ const Canvas = () => {
   const [tourStepIndex, setTourStepIndex] = useState(0);
   const [isTourActive, setIsTourActive] = useState(true);
   const [stickerSources, setStickerSources] = useState([]);
+  const [tooltipStyle, setTooltipStyle] = useState({});
+  const [highlightStyle, setHighlightStyle] = useState({});
+  const [arrowStyle, setArrowStyle] = useState({});
 
   useEffect(() => {
     setStickerSources(image_url);
@@ -189,18 +192,57 @@ const Canvas = () => {
   const currentStep = tourSteps[tourStepIndex];
 
   useEffect(() => {
-    if (
-      isTourActive &&
-      currentStep?.requireSelected &&
-      !selectedId
-    ) {
-      if (tourStepIndex + 1 < tourSteps.length) {
-        setTourStepIndex(tourStepIndex + 1);
-      } else {
-        setIsTourActive(false);
-      }
+    if (!isTourActive || !currentStep) {
+      setTooltipStyle({ display: 'none' });
+      setHighlightStyle({ display: 'none' });
+      setArrowStyle({ display: 'none' });
+      return;
     }
-  }, [tourStepIndex, selectedId, isTourActive, currentStep]);
+
+    const elem = document.querySelector(currentStep.selector);
+    if (elem) {
+      const rect = elem.getBoundingClientRect();
+      const scrollTop = window.scrollY;
+      const scrollLeft = window.scrollX;
+
+      setTooltipStyle({
+        position: 'absolute',
+        top: rect.bottom + 16 + scrollTop,
+        left: rect.left + scrollLeft,
+        zIndex: 10001,
+      });
+
+      setHighlightStyle({
+        position: 'absolute',
+        top: rect.top + scrollTop - 4,
+        left: rect.left + scrollLeft - 4,
+        width: rect.width + 8,
+        height: rect.height + 8,
+        border: '2px solid #00f',
+        borderRadius: '8px',
+        boxShadow: '0 0 12px rgba(0,0,255,0.6)',
+        pointerEvents: 'none',
+        zIndex: 10000,
+      });
+
+      setArrowStyle({
+        position: 'absolute',
+        top: rect.bottom + scrollTop,
+        left: rect.left + scrollLeft + rect.width / 2 - 8,
+        width: 0,
+        height: 0,
+        borderLeft: '8px solid transparent',
+        borderRight: '8px solid transparent',
+        borderTop: '8px solid #333',
+        zIndex: 10001,
+        pointerEvents: 'none',
+      });
+    } else {
+      setTooltipStyle({ display: 'none' });
+      setHighlightStyle({ display: 'none' });
+      setArrowStyle({ display: 'none' });
+    }
+  }, [tourStepIndex, isTourActive, selectedId, currentStep]);
 
   const nextStep = () => {
     if (tourStepIndex + 1 < tourSteps.length) {
@@ -214,31 +256,10 @@ const Canvas = () => {
     setIsTourActive(false);
   };
 
-  const [tooltipStyle, setTooltipStyle] = useState({});
-
-  useEffect(() => {
-    if (!isTourActive) {
-      setTooltipStyle({ display: 'none' });
-      return;
-    }
-    if (!currentStep) return;
-    const elem = document.querySelector(currentStep.selector);
-    if (elem) {
-      const rect = elem.getBoundingClientRect();
-      setTooltipStyle({
-        position: 'fixed',
-        top: rect.bottom + 10 + window.scrollY,
-        left: rect.left + window.scrollX,
-        zIndex: 10001,
-      });
-    } else {
-      setTooltipStyle({ display: 'none' });
-    }
-  }, [tourStepIndex, isTourActive, selectedId, currentStep]);
-
   return (
     <div className="canvas-wrapper">
-      <div className="canvas-controls" style={{ position: 'relative' }}>
+      <h1 className="heading">Sticker Canvas App</h1>
+      <div className="canvas-controls">
         <Stage
           width={600}
           height={400}
@@ -247,7 +268,6 @@ const Canvas = () => {
           onMouseDown={(e) => {
             if (e.target === e.target.getStage()) setSelectedId(null);
           }}
-          style={{ border: '1px solid #ccc', background: '#f9f9f9' }}
         >
           <Layer>
             {stickers.map((sticker) => (
@@ -263,14 +283,18 @@ const Canvas = () => {
           </Layer>
         </Stage>
 
-        <div className="toolbar" style={{ marginTop: 10 }}>
+        <div className="toolbar">
           <button onClick={() => addSticker('/smile.png')}>😀</button>
           <button onClick={() => addSticker('/star.png')}>🌟</button>
           <button onClick={() => addSticker('/fire.png')}>🔥</button>
           <button className="random-btn" onClick={addRandomSticker}>🎲 Random Sticker</button>
 
-          <label className="upload-label" style={{ cursor: 'pointer', userSelect: 'none', marginLeft: 10 }}>
-            <input type="file" accept="image/png, image/jpeg" onChange={handleImageUpload} style={{ display: 'none' }} />
+          <label className="upload-label">
+            <input
+              type="file"
+              accept="image/png, image/jpeg"
+              onChange={handleImageUpload}
+            />
             Upload
           </label>
 
@@ -281,61 +305,16 @@ const Canvas = () => {
 
         {isTourActive && (
           <>
-            <div
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                zIndex: 10000,
-              }}
-              onClick={skipTour}
-            />
-            <div style={tooltipStyle}>
-              <div style={{ marginBottom: 10 }}>{currentStep?.content}</div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                <button
-                  onClick={skipTour}
-                  style={{
-                    backgroundColor: '#ccc',
-                    border: 'none',
-                    padding: '6px 12px',
-                    borderRadius: 4,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Skip
-                </button>
+            <div className="highlight-box" style={highlightStyle} />
+            <div className="arrow" style={arrowStyle} />
+            <div className="tour-tooltip" style={tooltipStyle}>
+              <div>{currentStep?.content}</div>
+              <div className="tour-tooltip-buttons">
+                <button className="skip-btn" onClick={skipTour}>Skip</button>
                 {tourStepIndex + 1 === tourSteps.length ? (
-                  <button
-                    onClick={nextStep}
-                    style={{
-                      backgroundColor: '#4caf50',
-                      color: '#fff',
-                      border: 'none',
-                      padding: '6px 12px',
-                      borderRadius: 4,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Get Started
-                  </button>
+                  <button className="get-started-btn" onClick={nextStep}>Get Started</button>
                 ) : (
-                  <button
-                    onClick={nextStep}
-                    style={{
-                      backgroundColor: '#2196f3',
-                      color: '#fff',
-                      border: 'none',
-                      padding: '6px 12px',
-                      borderRadius: 4,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Next
-                  </button>
+                  <button className="next-btn" onClick={nextStep}>Next</button>
                 )}
               </div>
             </div>
