@@ -1,70 +1,98 @@
-# Getting Started with Create React App
+# 🖼️ MyEra Sticker Canvas App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An interactive sticker canvas app built with React and Konva. Easily add, move, resize, and manage stickers on a grid-based canvas with intuitive controls and a built-in guided tour for new users.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🚀 Features
 
-### `npm start`
+- 🧩 Add pre-defined stickers like 😀, 🌟, 🔥
+- 🎲 Add a random sticker from a large collection
+- 🖼️ Upload your own image stickers (PNG, JPEG)
+- 🖱️ Drag, scale, and transform stickers
+- 🧹 Snap to 40px grid for perfect alignment
+- 🧭 Guided user tour highlighting key features
+- ↩️ Undo / ↪️ Redo support
+- 📥 Download canvas as image
+- 🔄 Double-click to delete stickers
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🔧 Tech Stack
 
-### `npm test`
+- ⚛️ React.js
+- 🎨 Konva (via `react-konva`)
+- 🖼️ use-image hook (`use-image`)
+- 🗃️ Custom image loader (`image_url.js`)
+- 💅 Custom CSS for styling
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 📁 Folder Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+myera-sticker-app/
+│
+├── public/
+│ └── sticker1.png, sticker2.png, ...
+│
+├── src/
+│ ├── components/
+│ │ └── Canvas.js # Main canvas with sticker controls
+│ ├── file_paths.js # Sticker image URLs
+│ ├── App.js
+│ └── index.css
+│
+├── package.json
+└── README.md
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🛠️ Getting Started
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 1. Clone the Repository
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+git clone https://github.com/RisabhTomar9/myera-sticker-app.git
+cd myera-sticker-app
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
+### 2. Install Dependencies
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+npm install
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 
 
-### Code Splitting
+```bash
+npm start
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+The app will run at http://localhost:3000
 
-### Analyzing the Bundle Size
+🧪 Usage Instructions
+Add Sticker: Click 😀/🌟/🔥 or upload your own.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Move Sticker: Drag to move (snaps to grid).
 
-### Making a Progressive Web App
+Resize: Use corners to scale.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Delete: Double-click any sticker.
 
-### Advanced Configuration
+Undo/Redo: Use buttons to revert/restore actions.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Download: Export canvas as PNG image.
 
-### Deployment
+Guided Tour: Auto-starts on first load.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+✨ Credits
+React Konva
 
-### `npm run build` fails to minify
+Unsplash (optional for dynamic image sources)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Icons via Emoji Unicode
+
+🙌 Author
+Rishabh Tomar — @rishabhtomar
+
+Happy Stickering! 🎉

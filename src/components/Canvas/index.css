@@ -66,7 +66,7 @@ body {
 /* Buttons common style */
 
 .toolbar button,
-.upload-label {
+.upload-label{
   color: #000000;
   border: none;
   padding: 12px 18px;
@@ -80,6 +80,20 @@ body {
   background-color: #ffffff;
   width: 20%;
 }
+
+.bring-front-back-buttons{ 
+  color: #000000;
+  border: none;
+  padding: 12px 18px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  width: 20%;}
 
 .toolbar button:hover,
 .upload-label:hover {
@@ -178,7 +192,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: #ffffff;
   z-index: 10000;
   cursor: pointer; /* so user knows they can click to skip */
 }
@@ -186,7 +200,7 @@ body {
 /* Tour tooltip container */
 .tour-tooltip {
   position: fixed;
-  background: #fff;
+  background: #ffffff;
   padding: 12px 18px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -207,6 +221,7 @@ body {
 /* Tour buttons styling */
 .tour-tooltip-buttons button {
   padding: 6px 14px;
+  background-color: #fff;
   border: none;
   border-radius: 4px;
   font-weight: 600;

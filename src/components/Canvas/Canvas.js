@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer, Image as KonvaImage, Transformer } from 'react-konva';
 import useImage from 'use-image';
-import image_url from '../file_paths'; // go up one level from Canvas folder, then file_paths.js
+import image_url from '../file_paths';
 import './index.css';
 
 const tourSteps = [
@@ -28,11 +28,6 @@ const tourSteps = [
   {
     selector: '.toolbar button:nth-child(6)', // Download button
     content: 'Download the current canvas as an image.',
-  },
-  {
-    selector: '.bring-front-back-buttons', // Front/Back buttons
-    content: 'If a sticker is selected, you can bring it to front or send it to back here.',
-    requireSelected: true,
   },
 ];
 
@@ -105,18 +100,14 @@ const Canvas = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [history, setHistory] = useState([]);
   const [future, setFuture] = useState([]);
-
   const [tourStepIndex, setTourStepIndex] = useState(0);
   const [isTourActive, setIsTourActive] = useState(true);
-
   const [stickerSources, setStickerSources] = useState([]);
 
-  // Load sticker sources from imported JS array
   useEffect(() => {
     setStickerSources(image_url);
   }, []);
 
-  // Save current stickers state into history, clear future stack
   const saveHistory = (current) => {
     setHistory((h) => [...h, current]);
     setFuture([]);
@@ -179,26 +170,6 @@ const Canvas = () => {
     if (selectedId === id) setSelectedId(null);
   };
 
-  const bringToFront = (id) => {
-    saveHistory(stickers);
-    const index = stickers.findIndex((s) => s.id === id);
-    if (index === -1) return;
-    const updated = [...stickers];
-    const [item] = updated.splice(index, 1);
-    updated.push(item);
-    setStickers(updated);
-  };
-
-  const sendToBack = (id) => {
-    saveHistory(stickers);
-    const index = stickers.findIndex((s) => s.id === id);
-    if (index === -1) return;
-    const updated = [...stickers];
-    const [item] = updated.splice(index, 1);
-    updated.unshift(item);
-    setStickers(updated);
-  };
-
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -207,6 +178,7 @@ const Canvas = () => {
   };
 
   const downloadCanvas = () => {
+    setIsTourActive(false);
     const uri = stageRef.current.toDataURL();
     const link = document.createElement('a');
     link.download = 'sticker-canvas.png';
@@ -214,7 +186,6 @@ const Canvas = () => {
     link.click();
   };
 
-  // Tour step logic
   const currentStep = tourSteps[tourStepIndex];
 
   useEffect(() => {
@@ -243,7 +214,6 @@ const Canvas = () => {
     setIsTourActive(false);
   };
 
-  // Tooltip positioning near the target element
   const [tooltipStyle, setTooltipStyle] = useState({});
 
   useEffect(() => {
@@ -296,45 +266,19 @@ const Canvas = () => {
         <div className="toolbar" style={{ marginTop: 10 }}>
           <button onClick={() => addSticker('/smile.png')}>😀</button>
           <button onClick={() => addSticker('/star.png')}>🌟</button>
-          <button onClick={() => addSticker('/logo512.png')}>🔥</button>
+          <button onClick={() => addSticker('/fire.png')}>🔥</button>
+          <button className="random-btn" onClick={addRandomSticker}>🎲 Random Sticker</button>
 
-          <button className="random-btn" onClick={addRandomSticker}>
-            🎲 Random Sticker
-          </button>
-
-          <label
-            className="upload-label"
-            style={{ cursor: 'pointer', userSelect: 'none', marginLeft: 10 }}
-          >
-            <input
-              type="file"
-              accept="image/png, image/jpeg"
-              onChange={handleImageUpload}
-              style={{ display: 'none' }}
-            />
+          <label className="upload-label" style={{ cursor: 'pointer', userSelect: 'none', marginLeft: 10 }}>
+            <input type="file" accept="image/png, image/jpeg" onChange={handleImageUpload} style={{ display: 'none' }} />
             Upload
           </label>
 
           <button onClick={downloadCanvas}>Download</button>
-          <button onClick={undo} disabled={history.length === 0}>
-            ↩️ Undo
-          </button>
-          <button onClick={redo} disabled={future.length === 0}>
-            ↪️ Redo
-          </button>
-
-          {selectedId && (
-            <div
-              className="bring-front-back-buttons"
-              style={{ display: 'inline-block', marginLeft: 10 }}
-            >
-              <button onClick={() => bringToFront(selectedId)}>🔼 Front</button>
-              <button onClick={() => sendToBack(selectedId)}>🔽 Back</button>
-            </div>
-          )}
+          <button onClick={undo} disabled={history.length === 0}>↩️ Undo</button>
+          <button onClick={redo} disabled={future.length === 0}>↪️ Redo</button>
         </div>
 
-        {/* Tour Overlay */}
         {isTourActive && (
           <>
             <div
@@ -344,16 +288,14 @@ const Canvas = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: 'rgba(0,0,0,0.5)',
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
                 zIndex: 10000,
               }}
               onClick={skipTour}
             />
             <div style={tooltipStyle}>
               <div style={{ marginBottom: 10 }}>{currentStep?.content}</div>
-              <div
-                style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
                 <button
                   onClick={skipTour}
                   style={{
