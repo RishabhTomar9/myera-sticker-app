@@ -1,9 +1,40 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer, Image as KonvaImage, Transformer } from 'react-konva';
 import useImage from 'use-image';
-import { gsap } from 'gsap';
-import '@dotlottie/player-component';
+import image_url from '../file_paths'; // go up one level from Canvas folder, then file_paths.js
 import './index.css';
+
+const tourSteps = [
+  {
+    selector: '.toolbar button:nth-child(1)', // 😀 button
+    content: 'Click here to add a smiley sticker.',
+  },
+  {
+    selector: '.random-btn',
+    content: 'Click here to add a random sticker.',
+  },
+  {
+    selector: '.upload-label',
+    content: 'Upload your own sticker from your device here.',
+  },
+  {
+    selector: '.toolbar button:nth-child(7)', // Undo button
+    content: 'Undo your last action.',
+  },
+  {
+    selector: '.toolbar button:nth-child(8)', // Redo button
+    content: 'Redo your last undone action.',
+  },
+  {
+    selector: '.toolbar button:nth-child(6)', // Download button
+    content: 'Download the current canvas as an image.',
+  },
+  {
+    selector: '.bring-front-back-buttons', // Front/Back buttons
+    content: 'If a sticker is selected, you can bring it to front or send it to back here.',
+    requireSelected: true,
+  },
+];
 
 const Sticker = ({ sticker, isSelected, onSelect, onChange, onDblClick }) => {
   const [image] = useImage(sticker.src);
@@ -23,8 +54,8 @@ const Sticker = ({ sticker, isSelected, onSelect, onChange, onDblClick }) => {
         image={image}
         x={sticker.x}
         y={sticker.y}
-        width={60}
-        height={60}
+        width={80}
+        height={80}
         draggable
         scaleX={sticker.scaleX || 1}
         scaleY={sticker.scaleY || 1}
@@ -39,7 +70,7 @@ const Sticker = ({ sticker, isSelected, onSelect, onChange, onDblClick }) => {
             y: Math.round(e.target.y() / 40) * 40,
           });
         }}
-        onTransformEnd={(e) => {
+        onTransformEnd={() => {
           const node = shapeRef.current;
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
@@ -57,10 +88,9 @@ const Sticker = ({ sticker, isSelected, onSelect, onChange, onDblClick }) => {
       {isSelected && (
         <Transformer
           ref={trRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 20 || newBox.height < 20) return oldBox;
-            return newBox;
-          }}
+          boundBoxFunc={(oldBox, newBox) =>
+            newBox.width < 20 || newBox.height < 20 ? oldBox : newBox
+          }
           anchorSize={8}
         />
       )}
@@ -72,55 +102,42 @@ const Canvas = () => {
   const stageRef = useRef();
   const [stickers, setStickers] = useState([]);
   const [stickerId, setStickerId] = useState(1);
-  const [previews, setPreviews] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [history, setHistory] = useState([]);
   const [future, setFuture] = useState([]);
 
+  const [tourStepIndex, setTourStepIndex] = useState(0);
+  const [isTourActive, setIsTourActive] = useState(true);
+
+  const [stickerSources, setStickerSources] = useState([]);
+
+  // Load sticker sources from imported JS array
   useEffect(() => {
-    const stored = localStorage.getItem('stickers');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setStickers(parsed);
-      setStickerId(parsed.length + 1);
-      setPreviews(parsed.map((s) => s.src));
-    }
+    setStickerSources(image_url);
   }, []);
 
-  useEffect(() => {
-    gsap.from('.toolbar', {
-      y: -50,
-      opacity: 0,
-      duration: 1,
-      ease: 'power3.out',
-    });
-  }, []);
-
-  const saveToLocalStorage = (updatedStickers) => {
-    const safeData = updatedStickers.filter((s) => !s.src.startsWith('blob:'));
-    localStorage.setItem('stickers', JSON.stringify(safeData));
-    setPreviews(updatedStickers.map((s) => s.src));
-  };
-
+  // Save current stickers state into history, clear future stack
   const saveHistory = (current) => {
-    setHistory([...history, current]);
+    setHistory((h) => [...h, current]);
     setFuture([]);
   };
 
   const undo = () => {
     if (history.length === 0) return;
     const prev = history[history.length - 1];
-    setFuture([stickers, ...future]);
-    setHistory(history.slice(0, -1));
+    setFuture((f) => [stickers, ...f]);
+    setHistory((h) => h.slice(0, -1));
     setStickers(prev);
+    setSelectedId(null);
   };
 
   const redo = () => {
     if (future.length === 0) return;
     const next = future[0];
-    setHistory([...history, stickers]);
-    setFuture(future.slice(1));
+    setHistory((h) => [...h, stickers]);
+    setFuture((f) => f.slice(1));
     setStickers(next);
+    setSelectedId(null);
   };
 
   const addSticker = (src) => {
@@ -138,30 +155,28 @@ const Canvas = () => {
     const updated = [...stickers, newSticker];
     setStickers(updated);
     setStickerId(stickerId + 1);
-    saveToLocalStorage(updated);
+    setSelectedId(newSticker.id);
+  };
+
+  const addRandomSticker = () => {
+    if (stickerSources.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * stickerSources.length);
+    addSticker(stickerSources[randomIndex]);
   };
 
   const updateSticker = (updatedSticker) => {
     saveHistory(stickers);
-    const updated = stickers.map((s) => (s.id === updatedSticker.id ? updatedSticker : s));
+    const updated = stickers.map((s) =>
+      s.id === updatedSticker.id ? updatedSticker : s
+    );
     setStickers(updated);
-    saveToLocalStorage(updated);
   };
 
   const handleDelete = (id) => {
     saveHistory(stickers);
     const updated = stickers.filter((s) => s.id !== id);
     setStickers(updated);
-    setSelectedId(null);
-    saveToLocalStorage(updated);
-  };
-
-  const handleDeleteBySrc = (src) => {
-    saveHistory(stickers);
-    const updated = stickers.filter((s) => s.src !== src);
-    setStickers(updated);
-    setSelectedId(null);
-    saveToLocalStorage(updated);
+    if (selectedId === id) setSelectedId(null);
   };
 
   const bringToFront = (id) => {
@@ -172,7 +187,6 @@ const Canvas = () => {
     const [item] = updated.splice(index, 1);
     updated.push(item);
     setStickers(updated);
-    saveToLocalStorage(updated);
   };
 
   const sendToBack = (id) => {
@@ -183,7 +197,6 @@ const Canvas = () => {
     const [item] = updated.splice(index, 1);
     updated.unshift(item);
     setStickers(updated);
-    saveToLocalStorage(updated);
   };
 
   const handleImageUpload = (e) => {
@@ -201,9 +214,61 @@ const Canvas = () => {
     link.click();
   };
 
+  // Tour step logic
+  const currentStep = tourSteps[tourStepIndex];
+
+  useEffect(() => {
+    if (
+      isTourActive &&
+      currentStep?.requireSelected &&
+      !selectedId
+    ) {
+      if (tourStepIndex + 1 < tourSteps.length) {
+        setTourStepIndex(tourStepIndex + 1);
+      } else {
+        setIsTourActive(false);
+      }
+    }
+  }, [tourStepIndex, selectedId, isTourActive, currentStep]);
+
+  const nextStep = () => {
+    if (tourStepIndex + 1 < tourSteps.length) {
+      setTourStepIndex(tourStepIndex + 1);
+    } else {
+      setIsTourActive(false);
+    }
+  };
+
+  const skipTour = () => {
+    setIsTourActive(false);
+  };
+
+  // Tooltip positioning near the target element
+  const [tooltipStyle, setTooltipStyle] = useState({});
+
+  useEffect(() => {
+    if (!isTourActive) {
+      setTooltipStyle({ display: 'none' });
+      return;
+    }
+    if (!currentStep) return;
+    const elem = document.querySelector(currentStep.selector);
+    if (elem) {
+      const rect = elem.getBoundingClientRect();
+      setTooltipStyle({
+        position: 'fixed',
+        top: rect.bottom + 10 + window.scrollY,
+        left: rect.left + window.scrollX,
+        zIndex: 10001,
+      });
+    } else {
+      setTooltipStyle({ display: 'none' });
+    }
+  }, [tourStepIndex, isTourActive, selectedId, currentStep]);
+
   return (
     <div className="canvas-wrapper">
-      <div className="canvas-controls">
+      <div className="canvas-controls" style={{ position: 'relative' }}>
         <Stage
           width={600}
           height={400}
@@ -212,6 +277,7 @@ const Canvas = () => {
           onMouseDown={(e) => {
             if (e.target === e.target.getStage()) setSelectedId(null);
           }}
+          style={{ border: '1px solid #ccc', background: '#f9f9f9' }}
         >
           <Layer>
             {stickers.map((sticker) => (
@@ -227,47 +293,112 @@ const Canvas = () => {
           </Layer>
         </Stage>
 
-        <div className="toolbar">
-          <button onClick={() => addSticker('/logo192.png')}>😀</button>
-          <button onClick={() => addSticker('/logo512.png')}>🌟</button>
+        <div className="toolbar" style={{ marginTop: 10 }}>
+          <button onClick={() => addSticker('/smile.png')}>😀</button>
+          <button onClick={() => addSticker('/star.png')}>🌟</button>
           <button onClick={() => addSticker('/logo512.png')}>🔥</button>
-          <dotlottie-player
-            src="https://lottie.host/4db68bbd-31f6-4cd8-84eb-189de081159a/IGmMCqhzpt.lottie"
-            background="transparent"
-            speed="1"
-            style={{ width: '60px', height: '60px', cursor: 'pointer' }}
-            loop
-            autoplay
-            onClick={() => addSticker('https://assets2.lottiefiles.com/packages/lf20_u4yrau.json')}
-          />
 
-          <label className="upload-label">
-            <input type="file" accept="image/png, image/jpeg" onChange={handleImageUpload} />
+          <button className="random-btn" onClick={addRandomSticker}>
+            🎲 Random Sticker
+          </button>
+
+          <label
+            className="upload-label"
+            style={{ cursor: 'pointer', userSelect: 'none', marginLeft: 10 }}
+          >
+            <input
+              type="file"
+              accept="image/png, image/jpeg"
+              onChange={handleImageUpload}
+              style={{ display: 'none' }}
+            />
             Upload
           </label>
 
           <button onClick={downloadCanvas}>Download</button>
-          <button onClick={undo}>↩️ Undo</button>
-          <button onClick={redo}>↪️ Redo</button>
+          <button onClick={undo} disabled={history.length === 0}>
+            ↩️ Undo
+          </button>
+          <button onClick={redo} disabled={future.length === 0}>
+            ↪️ Redo
+          </button>
+
           {selectedId && (
-            <>
+            <div
+              className="bring-front-back-buttons"
+              style={{ display: 'inline-block', marginLeft: 10 }}
+            >
               <button onClick={() => bringToFront(selectedId)}>🔼 Front</button>
               <button onClick={() => sendToBack(selectedId)}>🔽 Back</button>
-            </>
+            </div>
           )}
         </div>
 
-        <div className="preview-box">
-          <h4>Preview</h4>
-          <div className="preview-grid">
-            {previews.map((src, index) => (
-              <div key={index} className="preview-item">
-                <img src={src} alt={`preview-${index}`} width={40} height={40} />
-                <button className="delete-btn" onClick={() => handleDeleteBySrc(src)}>✖</button>
+        {/* Tour Overlay */}
+        {isTourActive && (
+          <>
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                zIndex: 10000,
+              }}
+              onClick={skipTour}
+            />
+            <div style={tooltipStyle}>
+              <div style={{ marginBottom: 10 }}>{currentStep?.content}</div>
+              <div
+                style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}
+              >
+                <button
+                  onClick={skipTour}
+                  style={{
+                    backgroundColor: '#ccc',
+                    border: 'none',
+                    padding: '6px 12px',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Skip
+                </button>
+                {tourStepIndex + 1 === tourSteps.length ? (
+                  <button
+                    onClick={nextStep}
+                    style={{
+                      backgroundColor: '#4caf50',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: 4,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Get Started
+                  </button>
+                ) : (
+                  <button
+                    onClick={nextStep}
+                    style={{
+                      backgroundColor: '#2196f3',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: 4,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Next
+                  </button>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

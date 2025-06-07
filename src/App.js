@@ -3,9 +3,7 @@ import Canvas from './components/Canvas/Canvas';
 
 function App() {
   return (
-    <div className="App">
-      <Canvas />
-    </div>
+    <Canvas />
   );
 }
 
